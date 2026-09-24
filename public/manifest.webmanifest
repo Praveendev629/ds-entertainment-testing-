@@ -1,0 +1,21 @@
+{
+  "name": "DS Entertainment Zone",
+  "short_name": "DS Ent",
+  "description": "Download the latest movies with direct links and no ads.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#ec4899",
+  "icons": [
+    {
+      "src": "/ds-logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/ds-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

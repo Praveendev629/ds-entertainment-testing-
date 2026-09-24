@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* Global Deep Pink & Black Theme */
+:root {
+  --primary-pink: #ec4899;
+  --dark-pink: #be185d;
+  --light-pink: #f472b6;
+  --black-bg: #050505;
+  --dark-bg: #0a0a0a;
+  --card-bg: #111111;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(236, 72, 153, 0.3) transparent;
+}
+
+body {
+  background: var(--black-bg);
+  color: #ffffff;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(236, 72, 153, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(236, 72, 153, 0.4);
+}
+
+/* Iframe styling for anime page */
+iframe {
+  background: var(--black-bg);
+}
+
+/* Override any white backgrounds */
+.bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+/* Deep Pink accent for all interactive elements */
+button:hover,
+a:hover {
+  color: var(--light-pink);
+}
+
+/* Custom selection color */
+::selection {
+  background: rgba(236, 72, 153, 0.3);
+  color: #ffffff;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}

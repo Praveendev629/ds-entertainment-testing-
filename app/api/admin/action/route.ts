@@ -1,0 +1,71 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseServer } from "@/lib/supabase/server";
+
+function verifyAdmin(req: NextRequest): boolean {
+  const authHeader = req.headers.get("authorization");
+  const adminKey = process.env.ADMIN_SECRET_KEY;
+  if (!adminKey) return false;
+  return authHeader === `Bearer ${adminKey}`;
+}
+
+export async function POST(req: NextRequest) {
+  if (!verifyAdmin(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json();
+  const { userId, action } = body as { userId: string; action: "kick" | "unblock" | "block" };
+
+  if (!userId || !action) {
+    return NextResponse.json({ error: "Missing userId or action" }, { status: 400 });
+  }
+
+  const supabase = getSupabaseServer();
+
+  if (action === "kick") {
+    // Mark all active sessions as inactive
+    await supabase
+      .from("sessions")
+      .update({ is_active: false })
+      .eq("user_id", userId)
+      .eq("is_active", true);
+
+    // Set kicked flag
+    const { error } = await supabase
+      .from("users")
+      .update({ is_kicked: true })
+      .eq("id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "block") {
+    // Mark all active sessions as inactive
+    await supabase
+      .from("sessions")
+      .update({ is_active: false })
+      .eq("user_id", userId)
+      .eq("is_active", true);
+
+    const { error } = await supabase
+      .from("users")
+      .update({ is_blocked: true })
+      .eq("id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "unblock") {
+    const { error } = await supabase
+      .from("users")
+      .update({ is_blocked: false, is_kicked: false })
+      .eq("id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+}

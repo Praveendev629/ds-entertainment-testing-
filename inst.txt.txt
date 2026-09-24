@@ -1,0 +1,185 @@
+I have an existing website hosted on Vercel. I want to add a Supabase-powered user tracking and admin management system without breaking any existing functionality or design.
+
+IMPORTANT:
+
+* First inspect my existing project structure and understand the current authentication/navigation/components before changing anything.
+* Do not rewrite or replace unrelated parts of the website.
+* Preserve the existing UI, styling, animations, routes, and functionality.
+* Use environment variables for Supabase credentials. Never hard-code the Supabase service-role key in frontend code.
+* The admin functionality must be protected server-side. Do not rely only on hiding an admin button in the frontend.
+
+FEATURES I NEED:
+
+1. PERSISTENT USERNAME
+
+* On a user's first visit, show a simple name/username setup screen.
+* Ask the user for their name.
+* After submission, generate a persistent anonymous user ID.
+* Save the ID and username locally so refreshing the website does NOT ask for the name again.
+* Store the corresponding user record in Supabase.
+* If the user returns later using the same browser/device, recognize the same user.
+* Do not ask for the name on every refresh.
+* Handle localStorage being unavailable or cleared gracefully.
+
+2. USER DATABASE
+   Create an appropriate Supabase table for users.
+
+Store at minimum:
+
+* id
+* username
+* created_at / first_seen
+* last_seen
+* online status
+* kicked status
+* blocked status
+* current session ID if needed
+
+Use appropriate indexes and constraints.
+
+3. ONLINE / OFFLINE TRACKING
+   I need to know:
+
+* when a user first opened the website
+* when they were last active
+* whether they are currently online
+
+Do NOT depend only on beforeunload/pagehide because browsers do not guarantee those events.
+
+Implement a heartbeat system:
+
+* Send a heartbeat approximately every 20–30 seconds while the site is active.
+* Update last_seen.
+* Consider a user offline when their heartbeat has not been received for a reasonable timeout.
+* On pagehide/beforeunload, attempt to update the session, but treat the heartbeat timeout as the reliable fallback.
+
+4. ADMIN PANEL
+   Create a protected admin page/dashboard.
+
+The dashboard should display:
+
+* Username
+* User ID
+* Online/offline status
+* First seen
+* Last seen
+* Current session
+* Blocked status
+* Kicked status
+
+Show online users clearly.
+
+Add search/filtering by username.
+
+5. KICK USER
+   I need an admin "Kick" button.
+
+When an admin kicks a user:
+
+* Mark their current session as kicked in Supabase.
+* The user's browser should detect the kicked state through polling or Supabase Realtime.
+* Immediately terminate their active session/access.
+* Redirect them to a simple "You have been disconnected by the administrator" screen or the site's login/name screen.
+* Do not delete their user record just because they were kicked.
+* Allow the admin to let them reconnect later.
+
+6. BLOCK USER
+   Add a "Block" action.
+
+When blocked:
+
+* Prevent that user/session from accessing the protected parts of the site.
+* Show an appropriate blocked message.
+* Persist the blocked state in Supabase.
+* Include an "Unblock" admin action.
+
+Do not rely only on localStorage for blocking because users can clear it.
+
+7. ADMIN SECURITY
+   Create proper Supabase Row Level Security policies.
+
+Only authorized administrators can:
+
+* view all users
+* kick users
+* block users
+* unblock users
+* modify user status
+
+Normal users must not be able to query or modify other users' records.
+
+Never expose the Supabase service-role key in browser/client code.
+
+If the project does not currently have authentication, implement a secure admin authentication approach rather than creating an admin password directly in frontend JavaScript.
+
+8. SESSION HANDLING
+   Use a separate session concept so that:
+
+* One user can have multiple sessions/devices if appropriate.
+* Kicking a specific active session works correctly.
+* A stale browser session does not remain permanently online.
+* A new session can be created when the user returns.
+
+9. SUPABASE REALTIME
+   If useful, use Supabase Realtime so the admin dashboard updates when:
+
+* a user comes online
+* a user's last_seen changes
+* a user is kicked
+* a user is blocked/unblocked
+
+Avoid unnecessarily updating the database every second. Use a reasonable heartbeat interval.
+
+10. ADMIN DASHBOARD UI
+    Create a clean dashboard matching my existing website's design.
+
+Include:
+
+* Total users
+* Currently online
+* Recently active
+* Blocked users
+
+User table:
+Username | Status | First Seen | Last Seen | Actions
+
+Actions:
+
+* Kick
+* Block
+* Unblock
+
+Add confirmation before destructive/admin actions.
+
+11. PRIVACY
+    Only collect information necessary for this functionality.
+
+Do not attempt to obtain a visitor's real name, email address, phone number, precise location, or other personal information without explicitly asking for it.
+
+The username entered by the visitor should be the identity displayed in my admin dashboard.
+
+12. DEPLOYMENT
+    Make the implementation compatible with Vercel.
+
+Provide:
+
+* Supabase SQL/schema
+* RLS policies
+* required environment variables
+* frontend code
+* backend/API/server-side code where necessary
+* exact Vercel environment-variable setup
+* exact Supabase configuration steps
+* local development instructions
+* production deployment instructions
+
+Before finishing:
+
+* Check for security issues.
+* Check that normal users cannot access admin functionality.
+* Check that refreshing the page does not ask for the username again.
+* Check that closing/reopening the browser preserves the username on the same device/browser.
+* Check that stale users eventually become offline.
+* Check that Kick works even if the user does not refresh the page.
+* Check that Block cannot be bypassed simply by changing localStorage.
+* Do not remove or break any existing website functionality.
