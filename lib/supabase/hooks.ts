@@ -229,7 +229,7 @@ export function useUserTracking() {
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "users", filter: `id=eq.${userId}` },
-        (payload) => {
+        (payload: { new: { is_blocked: boolean; is_kicked: boolean } }) => {
           const newData = payload.new as { is_blocked: boolean; is_kicked: boolean };
           if (newData.is_kicked) {
             setState((prev) => ({ ...prev, kicked: true }));
@@ -271,7 +271,7 @@ export function useUserTracking() {
   }, [state.profile, state.blocked, state.kicked, sendHeartbeat, cleanup, checkBlockedOrKicked]);
 
   const setUsername = useCallback(async (username: string) => {
-    return await registerOrLogin(username);
+    await registerOrLogin(username);
   }, [registerOrLogin]);
 
   return { ...state, setUsername };
