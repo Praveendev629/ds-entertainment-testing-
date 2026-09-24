@@ -18,6 +18,21 @@ export async function GET() {
     );
   }
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  try {
+    await fetch(`${supabaseUrl}/rest/v1/`, { method: "GET" });
+  } catch (e) {
+    const cause = e instanceof Error && e.cause ? ` | cause: ${String(e.cause)}` : "";
+    return NextResponse.json(
+      {
+        error: `Server cannot reach Supabase at "${supabaseUrl}"${
+          e instanceof Error ? ` | ${e.message}` : ""
+        }${cause}`,
+      },
+      { status: 500 }
+    );
+  }
+
   try {
     const supabase = getSupabaseServer();
 
