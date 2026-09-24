@@ -1,18 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
-function verifyAdmin(req: NextRequest): boolean {
-  const authHeader = req.headers.get("authorization");
-  const adminKey = process.env.ADMIN_SECRET_KEY;
-  if (!adminKey) return false;
-  return authHeader === `Bearer ${adminKey}`;
-}
-
-export async function GET(req: NextRequest) {
-  if (!verifyAdmin(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export async function GET() {
   const supabase = getSupabaseServer();
 
   // Mark stale sessions

@@ -23,9 +23,6 @@ interface AdminUser {
 
 export default function AdminPage() {
   const router = useRouter();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [adminKey, setAdminKey] = useState("");
-  const [loginError, setLoginError] = useState("");
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -38,17 +35,8 @@ export default function AdminPage() {
 
   const fetchUsers = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin", {
-        headers: { Authorization: `Bearer ${adminKey}` },
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          setAuthenticated(false);
-          setLoginError("Invalid admin key");
-          return;
-        }
-        throw new Error("Failed to fetch");
-      }
+      const res = await fetch("/api/admin");
+      if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setUsers(data.users || []);
     } catch {
@@ -56,23 +44,13 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [adminKey]);
+  }, []);
 
   useEffect(() => {
-    if (!authenticated) return;
     fetchUsers();
     const interval = setInterval(fetchUsers, 10_000);
     return () => clearInterval(interval);
-  }, [authenticated, fetchUsers]);
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (adminKey.trim().length > 0) {
-      setAuthenticated(true);
-      setLoading(true);
-      setLoginError("");
-    }
-  };
+  }, [fetchUsers]);
 
   const performAction = async () => {
     if (!confirmAction) return;
@@ -80,10 +58,7 @@ export default function AdminPage() {
     try {
       const res = await fetch("/api/admin/action", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${adminKey}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId: confirmAction.userId,
           action: confirmAction.type,
@@ -128,58 +103,6 @@ export default function AdminPage() {
     const days = Math.floor(hrs / 24);
     return `${days}d ago`;
   };
-
-  // Login screen
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(236,72,153,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(236,72,153,0.03)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative z-10 w-full max-w-sm mx-4"
-        >
-          <div className="bg-[#0a0a0a] border border-pink-600/20 rounded-3xl p-8 shadow-2xl">
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-16 h-16 bg-pink-600/10 border border-pink-600/20 rounded-2xl flex items-center justify-center mb-4">
-                <Shield className="w-8 h-8 text-pink-500" />
-              </div>
-              <h1 className="text-xl font-bold text-white">Admin Access</h1>
-              <p className="text-sm text-zinc-500 mt-1">Enter your admin secret key</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <input
-                type="password"
-                value={adminKey}
-                onChange={(e) => { setAdminKey(e.target.value); setLoginError(""); }}
-                placeholder="Admin secret key"
-                autoFocus
-                className="w-full px-5 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder:text-zinc-600 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-pink-600/30 focus:border-pink-600/30 transition-all"
-              />
-              {loginError && (
-                <p className="text-red-500 text-xs ml-1">{loginError}</p>
-              )}
-              <button
-                type="submit"
-                className="w-full py-3.5 bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 rounded-2xl text-white font-bold text-sm transition-all"
-              >
-                Sign In
-              </button>
-            </form>
-
-            <button
-              onClick={() => router.push("/")}
-              className="w-full mt-4 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-zinc-400 hover:text-white font-medium text-sm transition-all"
-            >
-              Back to Site
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
