@@ -3,7 +3,10 @@ import { getSupabaseServer } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { userId, action } = body as { userId: string; action: "kick" | "unblock" | "block" };
+  const { userId, action } = body as {
+    userId: string;
+    action: "kick" | "unkick" | "block" | "unblock" | "delete";
+  };
 
   if (!userId || !action) {
     return NextResponse.json({ error: "Missing userId or action" }, { status: 400 });
@@ -51,6 +54,32 @@ export async function POST(req: NextRequest) {
       .from("users")
       .update({ is_blocked: false, is_kicked: false })
       .eq("id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "unkick") {
+    const { error } = await supabase
+      .from("users")
+      .update({ is_kicked: false })
+      .eq("id", userId);
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  }
+
+  if (action === "delete") {
+    const { error: sessionsError } = await supabase
+      .from("sessions")
+      .delete()
+      .eq("user_id", userId);
+
+    if (sessionsError) {
+      return NextResponse.json({ error: sessionsError.message }, { status: 500 });
+    }
+
+    const { error } = await supabase.from("users").delete().eq("id", userId);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });

@@ -197,7 +197,7 @@ export function useUserTracking() {
 
   // Start heartbeat + realtime subscription after profile loaded
   useEffect(() => {
-    if (!state.profile || state.blocked || state.kicked) return;
+    if (!state.profile) return;
 
     const supabase = getSupabaseBrowser();
     const userId = state.profile.id;
@@ -205,13 +205,15 @@ export function useUserTracking() {
 
     if (!sessionId) return;
 
-    // Send initial heartbeat
-    sendHeartbeat(sessionId, userId);
-
-    // Heartbeat interval
-    heartbeatRef.current = setInterval(() => {
+    // Keep realtime + polling alive while kicked/blocked so an admin
+    // unkick/unblock takes effect without the visitor having to reset.
+    if (!state.blocked && !state.kicked) {
       sendHeartbeat(sessionId, userId);
-    }, HEARTBEAT_INTERVAL);
+
+      heartbeatRef.current = setInterval(() => {
+        sendHeartbeat(sessionId, userId);
+      }, HEARTBEAT_INTERVAL);
+    }
 
     // Cleanup on page hide
     const handlePageHide = async () => {

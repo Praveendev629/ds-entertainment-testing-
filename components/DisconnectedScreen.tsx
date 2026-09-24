@@ -11,7 +11,6 @@ export default function DisconnectedScreen({ type }: Props) {
   const isKicked = type === "kicked";
 
   const handleReload = () => {
-    try { localStorage.clear(); } catch {}
     window.location.reload();
   };
 

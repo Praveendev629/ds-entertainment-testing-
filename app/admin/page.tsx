@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Users, Wifi, WifiOff, Search, ArrowLeft, Loader2,
-  Ban, LogOut, Clock, Unlock, RefreshCw
+  Ban, LogOut, LogIn, Clock, Unlock, RefreshCw, Trash2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -27,7 +27,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [confirmAction, setConfirmAction] = useState<{
-    type: "kick" | "block" | "unblock";
+    type: "kick" | "unkick" | "block" | "unblock" | "delete";
     userId: string;
     username: string;
   } | null>(null);
@@ -245,12 +245,29 @@ export default function AdminPage() {
                               <Unlock className="w-4 h-4" />
                             </button>
                           )}
+                          {user.is_kicked ? (
+                            <button
+                              onClick={() => setConfirmAction({ type: "unkick", userId: user.id, username: user.username })}
+                              className="p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 rounded-xl text-green-400 hover:text-green-300 transition-all"
+                              title="Unkick user"
+                            >
+                              <LogIn className="w-4 h-4" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setConfirmAction({ type: "kick", userId: user.id, username: user.username })}
+                              className="p-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 rounded-xl text-orange-400 hover:text-orange-300 transition-all"
+                              title="Kick user"
+                            >
+                              <LogOut className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
-                            onClick={() => setConfirmAction({ type: "kick", userId: user.id, username: user.username })}
-                            className="p-2 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/20 rounded-xl text-orange-400 hover:text-orange-300 transition-all"
-                            title="Kick user"
+                            onClick={() => setConfirmAction({ type: "delete", userId: user.id, username: user.username })}
+                            className="p-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-xl text-red-400 hover:text-red-300 transition-all"
+                            title="Delete user"
                           >
-                            <LogOut className="w-4 h-4" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -289,13 +306,17 @@ export default function AdminPage() {
             >
               <h3 className="text-lg font-bold text-white mb-2">
                 {confirmAction.type === "kick" && "Kick User"}
+                {confirmAction.type === "unkick" && "Unkick User"}
                 {confirmAction.type === "block" && "Block User"}
                 {confirmAction.type === "unblock" && "Unblock User"}
+                {confirmAction.type === "delete" && "Delete User"}
               </h3>
               <p className="text-sm text-zinc-500 mb-6">
                 {confirmAction.type === "kick" && `Are you sure you want to kick "${confirmAction.username}"? They will be disconnected immediately.`}
+                {confirmAction.type === "unkick" && `Let "${confirmAction.username}" back into the site?`}
                 {confirmAction.type === "block" && `Are you sure you want to block "${confirmAction.username}"? They will lose access to the site.`}
                 {confirmAction.type === "unblock" && `Are you sure you want to unblock "${confirmAction.username}"?`}
+                {confirmAction.type === "delete" && `Delete "${confirmAction.username}" permanently? Their account and all sessions will be removed from the database.`}
               </p>
               <div className="flex gap-3">
                 <button
@@ -308,15 +329,21 @@ export default function AdminPage() {
                   onClick={performAction}
                   disabled={actionLoading}
                   className={`flex-1 py-3 rounded-2xl text-white font-bold text-sm transition-all flex items-center justify-center gap-2 ${
-                    confirmAction.type === "unblock"
+                    confirmAction.type === "unblock" || confirmAction.type === "unkick"
                       ? "bg-green-600 hover:bg-green-500"
-                      : "bg-pink-600 hover:bg-pink-500"
+                      : confirmAction.type === "delete"
+                        ? "bg-red-600 hover:bg-red-500"
+                        : "bg-pink-600 hover:bg-pink-500"
                   } disabled:opacity-50`}
                 >
                   {actionLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    confirmAction.type === "kick" ? "Kick" : confirmAction.type === "block" ? "Block" : "Unblock"
+                    confirmAction.type === "kick" ? "Kick"
+                      : confirmAction.type === "unkick" ? "Unkick"
+                        : confirmAction.type === "block" ? "Block"
+                          : confirmAction.type === "delete" ? "Delete"
+                            : "Unblock"
                   )}
                 </button>
               </div>
