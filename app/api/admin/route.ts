@@ -2,7 +2,22 @@ import { NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabase/server";
 
 export async function GET() {
-  const supabase = getSupabaseServer();
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json(
+      { error: "Server missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set in Vercel" },
+      { status: 500 }
+    );
+  }
+
+  let supabase;
+  try {
+    supabase = getSupabaseServer();
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Failed to create Supabase client" },
+      { status: 500 }
+    );
+  }
 
   // Mark stale sessions
   await supabase.rpc("mark_stale_sessions" as never);

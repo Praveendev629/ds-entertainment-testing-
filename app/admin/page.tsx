@@ -32,15 +32,20 @@ export default function AdminPage() {
     username: string;
   } | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const fetchUsers = useCallback(async () => {
     try {
       const res = await fetch("/api/admin");
-      if (!res.ok) throw new Error("Failed to fetch");
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Request failed (${res.status})`);
+      }
       setUsers(data.users || []);
-    } catch {
+      setFetchError(null);
+    } catch (e) {
       console.error("Failed to fetch users");
+      setFetchError(e instanceof Error ? e.message : "Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -173,6 +178,12 @@ export default function AdminPage() {
               />
             </div>
 
+            {fetchError && (
+              <div className="mb-6 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 text-sm font-medium">
+                Failed to load users: {fetchError}
+              </div>
+            )}
+
             {/* User Table */}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -248,7 +259,7 @@ export default function AdminPage() {
                 </tbody>
               </table>
 
-              {filteredUsers.length === 0 && (
+              {filteredUsers.length === 0 && !fetchError && (
                 <div className="text-center py-16">
                   <Users className="w-12 h-12 text-zinc-800 mx-auto mb-4" />
                   <p className="text-zinc-600 font-medium">No users found</p>
