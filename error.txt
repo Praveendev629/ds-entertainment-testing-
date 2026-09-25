@@ -1,0 +1,15 @@
+  Running TypeScript ...
+Failed to type check.
+./components/UserTrackingProvider.tsx:66:27
+Type error: Type '(username: string) => Promise<UserProfile>' is not assignable to type '(username: string) => Promise<void>'.
+  Type 'Promise<UserProfile>' is not assignable to type 'Promise<void>'.
+    Type 'UserProfile' is not assignable to type 'void'.
+  64 |
+  65 |   if (needsUsername) {
+> 66 |     return <UsernameSetup onSubmit={setUsername} />;
+     |                           ^
+  67 |   }
+  68 |
+  69 |   return (
+Next.js build worker exited with code: 1 and signal: null
+Error: Command "npm run build" exited with 1

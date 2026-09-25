@@ -1,1 +1,144 @@
-if(!self.define){let e,s={};const n=(n,t)=>(n=new URL(n+".js",t).href,s[n]||new Promise(s=>{if("document"in self){const e=document.createElement("script");e.src=n,e.onload=s,document.head.appendChild(e)}else e=n,importScripts(n),s()}).then(()=>{let e=s[n];if(!e)throw new Error(`Module ${n} didn’t register its module`);return e}));self.define=(t,i)=>{const a=e||("document"in self?document.currentScript.src:"")||location.href;if(s[a])return;let c={};const f=e=>n(e,a),d={module:{uri:a},exports:c,require:f};s[a]=Promise.all(t.map(e=>d[e]||f(e))).then(e=>(i(...e),c))}}define(["./workbox-4754cb34"],function(e){"use strict";importScripts(),self.skipWaiting(),e.clientsClaim(),e.precacheAndRoute([{url:"/_next/static/chunks/4bd1b696-215e5051988c3dde.js",revision:"215e5051988c3dde"},{url:"/_next/static/chunks/794-a672c5263ced7d9f.js",revision:"a672c5263ced7d9f"},{url:"/_next/static/chunks/899.1813981119fa1f8a.js",revision:"1813981119fa1f8a"},{url:"/_next/static/chunks/936-d0950309d1f1acd5.js",revision:"d0950309d1f1acd5"},{url:"/_next/static/chunks/966.1775eb621d8d3e09.js",revision:"1775eb621d8d3e09"},{url:"/_next/static/chunks/app/_global-error/page-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/app/_not-found/page-1130cef12ee76004.js",revision:"1130cef12ee76004"},{url:"/_next/static/chunks/app/api/category/route-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/app/api/details/route-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/app/api/home/route-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/app/api/poster/route-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/app/layout-38407f3391a6c8df.js",revision:"38407f3391a6c8df"},{url:"/_next/static/chunks/app/page-2e1ffa0fcedf0bd9.js",revision:"2e1ffa0fcedf0bd9"},{url:"/_next/static/chunks/framework-93cda6578f6c76ec.js",revision:"93cda6578f6c76ec"},{url:"/_next/static/chunks/main-a0198102dd9cace6.js",revision:"a0198102dd9cace6"},{url:"/_next/static/chunks/main-app-0581d3772991b3a5.js",revision:"0581d3772991b3a5"},{url:"/_next/static/chunks/next/dist/client/components/builtin/app-error-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/next/dist/client/components/builtin/forbidden-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/next/dist/client/components/builtin/global-error-63294f7ea1d3ee6d.js",revision:"63294f7ea1d3ee6d"},{url:"/_next/static/chunks/next/dist/client/components/builtin/not-found-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/next/dist/client/components/builtin/unauthorized-18dbefeff79ddcff.js",revision:"18dbefeff79ddcff"},{url:"/_next/static/chunks/polyfills-42372ed130431b0a.js",revision:"846118c33b2c0e922d7b3a7676f81f6f"},{url:"/_next/static/chunks/webpack-0e6af0bcb71d3b8a.js",revision:"0e6af0bcb71d3b8a"},{url:"/_next/static/css/28c2757f669e60d6.css",revision:"28c2757f669e60d6"},{url:"/_next/static/media/4cf2300e9c8272f7-s.p.woff2",revision:"18bae71b1e1b2bb25321090a3b563103"},{url:"/_next/static/media/8d697b304b401681-s.woff2",revision:"cc728f6c0adb04da0dfcb0fc436a8ae5"},{url:"/_next/static/media/ba015fad6dcf6784-s.woff2",revision:"8ea4f719af3312a055caf09f34c89a77"},{url:"/_next/static/xzbfPKf3h22W19bqcGFpF/_buildManifest.js",revision:"2d5b55612637aab35064b3ffb7b19b7f"},{url:"/_next/static/xzbfPKf3h22W19bqcGFpF/_ssgManifest.js",revision:"b6652df95db52feb4daf4eca35380933"},{url:"/file.svg",revision:"d09f95206c3fa0bb9bd9fefabfd0ea71"},{url:"/globe.svg",revision:"2aaafa6a49b6563925fe440891e32717"},{url:"/manifest.webmanifest",revision:"d8bd560fe0c2ee22c6f04d56f539fd88"},{url:"/next.svg",revision:"8e061864f388b47f33a1c3780831193e"},{url:"/vercel.svg",revision:"c0af2f507b369b085b35ef4bbe3bcf1e"},{url:"/window.svg",revision:"a2760511c65806022ad20adf74370ff3"}],{ignoreURLParametersMatching:[]}),e.cleanupOutdatedCaches(),e.registerRoute("/",new e.NetworkFirst({cacheName:"start-url",plugins:[{cacheWillUpdate:async({request:e,response:s,event:n,state:t})=>s&&"opaqueredirect"===s.type?new Response(s.body,{status:200,statusText:"OK",headers:s.headers}):s}]}),"GET"),e.registerRoute(/^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,new e.CacheFirst({cacheName:"google-fonts-webfonts",plugins:[new e.ExpirationPlugin({maxEntries:4,maxAgeSeconds:31536e3})]}),"GET"),e.registerRoute(/^https:\/\/fonts\.(?:googleapis)\.com\/.*/i,new e.StaleWhileRevalidate({cacheName:"google-fonts-stylesheets",plugins:[new e.ExpirationPlugin({maxEntries:4,maxAgeSeconds:604800})]}),"GET"),e.registerRoute(/\.(?:eot|otf|ttc|ttf|woff|woff2|font.css)$/i,new e.StaleWhileRevalidate({cacheName:"static-font-assets",plugins:[new e.ExpirationPlugin({maxEntries:4,maxAgeSeconds:604800})]}),"GET"),e.registerRoute(/\.(?:jpg|jpeg|gif|png|svg|ico|webp)$/i,new e.StaleWhileRevalidate({cacheName:"static-image-assets",plugins:[new e.ExpirationPlugin({maxEntries:64,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\/_next\/image\?url=.+$/i,new e.StaleWhileRevalidate({cacheName:"next-image",plugins:[new e.ExpirationPlugin({maxEntries:64,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:mp3|wav|ogg)$/i,new e.CacheFirst({cacheName:"static-audio-assets",plugins:[new e.RangeRequestsPlugin,new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:mp4)$/i,new e.CacheFirst({cacheName:"static-video-assets",plugins:[new e.RangeRequestsPlugin,new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:js)$/i,new e.StaleWhileRevalidate({cacheName:"static-js-assets",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:css|less)$/i,new e.StaleWhileRevalidate({cacheName:"static-style-assets",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\/_next\/data\/.+\/.+\.json$/i,new e.StaleWhileRevalidate({cacheName:"next-data",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(/\.(?:json|xml|csv)$/i,new e.NetworkFirst({cacheName:"static-data-assets",plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(({url:e})=>{if(!(self.origin===e.origin))return!1;const s=e.pathname;return!s.startsWith("/api/auth/")&&!!s.startsWith("/api/")},new e.NetworkFirst({cacheName:"apis",networkTimeoutSeconds:10,plugins:[new e.ExpirationPlugin({maxEntries:16,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(({url:e})=>{if(!(self.origin===e.origin))return!1;return!e.pathname.startsWith("/api/")},new e.NetworkFirst({cacheName:"others",networkTimeoutSeconds:10,plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:86400})]}),"GET"),e.registerRoute(({url:e})=>!(self.origin===e.origin),new e.NetworkFirst({cacheName:"cross-origin",networkTimeoutSeconds:10,plugins:[new e.ExpirationPlugin({maxEntries:32,maxAgeSeconds:3600})]}),"GET")});
+/* DS Entertainment Zone service worker */
+const VERSION = "v1";
+const PAGES_CACHE = `ds-pages-${VERSION}`;
+const STATIC_CACHE = `ds-static-${VERSION}`;
+const MEDIA_CACHE = `ds-media-${VERSION}`;
+const KEEP_CACHES = [PAGES_CACHE, STATIC_CACHE, MEDIA_CACHE];
+
+const PRECACHE_URLS = [
+  "/",
+  "/manifest.webmanifest",
+  "/admin-manifest.webmanifest",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+];
+
+const OFFLINE_HTML = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Offline</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#050505;color:#fff;font-family:system-ui,-apple-system,sans-serif}
+  .card{max-width:22rem;padding:2rem;text-align:center}
+  h1{font-size:1.25rem;margin:0 0 .5rem}
+  p{color:#71717a;font-size:.9rem;line-height:1.6;margin:0 0 1.25rem}
+  button{width:100%;padding:.875rem;border:0;border-radius:1rem;background:#db2777;color:#fff;font-weight:700;font-size:.875rem;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>You are offline</h1>
+    <p>No internet connection. Check your network and try again.</p>
+    <button onclick="location.reload()">Try again</button>
+  </div>
+</body>
+</html>`;
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(STATIC_CACHE)
+      .then((cache) =>
+        Promise.allSettled(
+          PRECACHE_URLS.map((url) =>
+            fetch(url, { cache: "reload" }).then((res) => {
+              if (res && res.ok) return cache.put(url, res);
+              return undefined;
+            })
+          )
+        )
+      )
+      .catch(() => undefined)
+      .then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(
+        keys.filter((key) => !KEEP_CACHES.includes(key)).map((key) => caches.delete(key))
+      );
+      await self.clients.claim();
+    })()
+  );
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data === "SKIP_WAITING") self.skipWaiting();
+});
+
+self.addEventListener("fetch", (event) => {
+  const request = event.request;
+
+  if (request.method !== "GET") return;
+
+  const url = new URL(request.url);
+
+  // Service worker script and Supabase (live user data) always hit the network.
+  if (url.pathname === "/sw.js") return;
+  if (url.hostname.endsWith(".supabase.co") || url.hostname.endsWith(".supabase.in")) return;
+
+  // Never serve cached API responses - admin/user data must stay fresh.
+  if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) return;
+
+  const isStatic =
+    url.pathname.startsWith("/_next/static/") ||
+    url.pathname.startsWith("/_next/media/") ||
+    url.pathname === "/ds-logo.png";
+
+  const isMedia =
+    request.destination === "image" ||
+    request.destination === "font" ||
+    /\.(png|jpe?g|gif|webp|avif|svg|ico|woff2?|ttf|otf|mp4|webm|mp3)$/.test(url.pathname);
+
+  if (isStatic || isMedia) {
+    event.respondWith(cacheFirst(request, isStatic ? STATIC_CACHE : MEDIA_CACHE));
+    return;
+  }
+
+  event.respondWith(networkFirst(request));
+});
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+
+  try {
+    const response = await fetch(request);
+    if (response && (response.ok || response.type === "opaque") && response.status !== 206) {
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return new Response("", { status: 504, statusText: "Offline" });
+  }
+}
+
+async function networkFirst(request) {
+  const cache = await caches.open(PAGES_CACHE);
+
+  try {
+    const response = await fetch(request);
+    if (response && response.ok) {
+      await cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+
+    if (request.mode === "navigate") {
+      return new Response(OFFLINE_HTML, {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" },
+      });
+    }
+
+    return new Response("", { status: 504, statusText: "Offline" });
+  }
+}

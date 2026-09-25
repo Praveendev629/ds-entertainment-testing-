@@ -7,6 +7,7 @@ import {
   Ban, LogOut, LogIn, Clock, Unlock, RefreshCw, Trash2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import InstallAppButton from "@/components/InstallAppButton";
 
 interface AdminUser {
   id: string;
@@ -126,12 +127,15 @@ export default function AdminPage() {
               <span className="text-lg font-bold">Admin Dashboard</span>
             </div>
           </div>
-          <button
-            onClick={fetchUsers}
-            className="p-2 hover:bg-white/5 rounded-xl border border-white/5 text-zinc-400 hover:text-white transition-all"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <InstallAppButton />
+            <button
+              onClick={fetchUsers}
+              className="p-2 hover:bg-white/5 rounded-xl border border-white/5 text-zinc-400 hover:text-white transition-all"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -316,7 +320,7 @@ export default function AdminPage() {
                 {confirmAction.type === "unkick" && `Let "${confirmAction.username}" back into the site?`}
                 {confirmAction.type === "block" && `Are you sure you want to block "${confirmAction.username}"? They will lose access to the site.`}
                 {confirmAction.type === "unblock" && `Are you sure you want to unblock "${confirmAction.username}"?`}
-                {confirmAction.type === "delete" && `Delete "${confirmAction.username}" permanently? Their account and all sessions will be removed from the database.`}
+                {confirmAction.type === "delete" && `Delete "${confirmAction.username}" permanently? Their account and all sessions are removed from the database, and that device is signed out and asked to enter a new name.`}
               </p>
               <div className="flex gap-3">
                 <button

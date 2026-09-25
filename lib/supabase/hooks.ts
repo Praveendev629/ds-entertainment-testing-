@@ -8,6 +8,7 @@ const HEARTBEAT_INTERVAL = 25_000;
 const STORAGE_KEY_USER = "ds_user_id";
 const STORAGE_KEY_USERNAME = "ds_username";
 const STORAGE_KEY_SESSION = "ds_session_id";
+const STORAGE_KEY_SYNCED = "ds_synced";
 
 function generateId() {
   return crypto.randomUUID();
@@ -22,6 +23,26 @@ function getStoredUsername(): string | null {
 function getStoredSessionId(): string | null {
   try { return localStorage.getItem(STORAGE_KEY_SESSION); } catch { return null; }
 }
+function clearStoredIdentity() {
+  try { localStorage.removeItem(STORAGE_KEY_USER); } catch {}
+  try { localStorage.removeItem(STORAGE_KEY_USERNAME); } catch {}
+  try { localStorage.removeItem(STORAGE_KEY_SESSION); } catch {}
+  try { localStorage.removeItem(STORAGE_KEY_SYNCED); } catch {}
+}
+// "0" = the local identity never reached the database (e.g. registered offline).
+// A missing value counts as synced so accounts created before this flag still
+// get wiped when an admin deletes them.
+function isSynced(): boolean {
+  try { return localStorage.getItem(STORAGE_KEY_SYNCED) !== "0"; } catch { return true; }
+}
+function markSynced(): void {
+  try { localStorage.setItem(STORAGE_KEY_SYNCED, "1"); } catch {}
+}
+function markUnsynced(): void {
+  try { localStorage.setItem(STORAGE_KEY_SYNCED, "0"); } catch {}
+}
+
+const NO_ROWS_ERROR = "PGRST116";
 
 export interface UserProfile {
   id: string;
@@ -61,6 +82,15 @@ export function useUserTracking() {
     }
   }, []);
 
+  // The account no longer exists in the database (admin deleted it):
+  // wipe the identity stored on this device so a new name is requested.
+  const resetToUsernameSetup = useCallback(() => {
+    clearStoredIdentity();
+    cleanup();
+    profileRef.current = null;
+    setState({ initialized: true, needsUsername: true, profile: null, kicked: false, blocked: false });
+  }, [cleanup]);
+
   const sendHeartbeat = useCallback(async (sessionId: string, userId: string) => {
     const supabase = getSupabaseBrowser();
     await supabase
@@ -84,6 +114,7 @@ export function useUserTracking() {
     try { localStorage.setItem(STORAGE_KEY_USER, userId); } catch {}
     try { localStorage.setItem(STORAGE_KEY_USERNAME, username); } catch {}
     try { localStorage.setItem(STORAGE_KEY_SESSION, sessionId); } catch {}
+    markUnsynced();
 
     const ua = navigator.userAgent;
 
@@ -95,16 +126,18 @@ export function useUserTracking() {
       .single();
 
     if (existingUser) {
-      await supabase
+      const { error } = await supabase
         .from("users")
         .update({ username, last_seen: new Date().toISOString() })
         .eq("id", userId);
+      if (!error) markSynced();
     } else {
-      await supabase.from("users").insert({
+      const { error } = await supabase.from("users").insert({
         id: userId,
         username,
         last_seen: new Date().toISOString(),
       });
+      if (!error) markSynced();
     }
 
     // Deactivate old sessions for this user
@@ -135,17 +168,28 @@ export function useUserTracking() {
     return profile;
   }, []);
 
-  const checkBlockedOrKicked = useCallback(async (userId: string) => {
-    const supabase = getSupabaseBrowser();
-    const { data } = await supabase
-      .from("users")
-      .select("is_blocked, is_kicked")
-      .eq("id", userId)
-      .single();
+  const fetchUserStatus = useCallback(
+    async (userId: string): Promise<
+      { status: "ok"; blocked: boolean; kicked: boolean } | { status: "deleted" } | { status: "unknown" }
+    > => {
+      const supabase = getSupabaseBrowser();
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_blocked, is_kicked")
+        .eq("id", userId)
+        .single();
 
-    if (!data) return { blocked: false, kicked: false };
-    return { blocked: data.is_blocked, kicked: data.is_kicked };
-  }, []);
+      if (error) {
+        // Only treat "no rows" as a deletion - network errors must not wipe the device.
+        if (error.code === NO_ROWS_ERROR) return { status: "deleted" };
+        return { status: "unknown" };
+      }
+
+      if (!data) return { status: "deleted" };
+      return { status: "ok", blocked: data.is_blocked, kicked: data.is_kicked };
+    },
+    []
+  );
 
   // Initialize: check stored credentials
   useEffect(() => {
@@ -161,15 +205,39 @@ export function useUserTracking() {
       const supabase = getSupabaseBrowser();
 
       // Check if user exists and get status
-      const { data: user } = await supabase
+      const { data: user, error: userError } = await supabase
         .from("users")
         .select("id, username, is_blocked, is_kicked")
         .eq("id", userId)
         .single();
 
+      if (!user && userError?.code === NO_ROWS_ERROR) {
+        if (!isSynced()) {
+          // The name was never stored in the database (e.g. registered offline) - retry.
+          await registerOrLogin(username);
+          return;
+        }
+        // Deleted by the administrator: forget this device and ask for a new name.
+        resetToUsernameSetup();
+        return;
+      }
+
       if (!user) {
-        // User record missing from DB, re-create
-        await registerOrLogin(username);
+        // Row could not be read (offline / schema not deployed) - keep local identity.
+        const fallbackProfile: UserProfile = {
+          id: userId,
+          username,
+          is_blocked: false,
+          is_kicked: false,
+        };
+        profileRef.current = fallbackProfile;
+        setState({
+          initialized: true,
+          needsUsername: false,
+          profile: fallbackProfile,
+          kicked: false,
+          blocked: false,
+        });
         return;
       }
 
@@ -244,13 +312,27 @@ export function useUserTracking() {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "users", filter: `id=eq.${userId}` },
+        () => {
+          resetToUsernameSetup();
+        }
+      )
       .subscribe();
 
     unsubscribeRef.current = channel;
 
-    // Poll for kicked/blocked every 5s as fallback (realtime may not always fire)
+    // Poll for kicked/blocked/deleted every 5s as fallback (realtime may not always fire)
     const pollInterval = setInterval(async () => {
-      const result = await checkBlockedOrKicked(userId);
+      const result = await fetchUserStatus(userId);
+
+      if (result.status === "deleted") {
+        resetToUsernameSetup();
+        return;
+      }
+      if (result.status === "unknown") return;
+
       setState((prev) => {
         if (prev.blocked !== result.blocked || prev.kicked !== result.kicked) {
           return { ...prev, blocked: result.blocked, kicked: result.kicked };
@@ -270,7 +352,7 @@ export function useUserTracking() {
         s.from("sessions").update({ is_active: false }).eq("id", sessionId);
       }
     };
-  }, [state.profile, state.blocked, state.kicked, sendHeartbeat, cleanup, checkBlockedOrKicked]);
+  }, [state.profile, state.blocked, state.kicked, sendHeartbeat, cleanup, fetchUserStatus, resetToUsernameSetup]);
 
   const setUsername = useCallback(async (username: string) => {
     await registerOrLogin(username);
